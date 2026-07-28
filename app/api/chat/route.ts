@@ -41,21 +41,35 @@ function lastUserMessageContent(messages: ApiChatRequestMessage[]): string {
   return "";
 }
 
-function isValidMessages(value: unknown): value is ApiChatRequestMessage[] {
-  if (!Array.isArray(value)) return false;
-  if (value.length === 0 || value.length > MAX_MESSAGES_PER_REQUEST) return false;
+function validateMessages(value: unknown): { valid: true; messages: ApiChatRequestMessage[] } | { valid: false; reason: string } {
+  if (!Array.isArray(value)) return { valid: false, reason: "messages must be an array" };
+  if (value.length === 0) return { valid: false, reason: "messages array is empty" };
+  if (value.length > MAX_MESSAGES_PER_REQUEST) {
+    return { valid: false, reason: `too many messages (${value.length} > ${MAX_MESSAGES_PER_REQUEST})` };
+  }
 
-  return value.every((item): item is ApiChatRequestMessage => {
-    if (typeof item !== "object" || item === null) return false;
+  for (let i = 0; i < value.length; i++) {
+    const item = value[i];
+    if (typeof item !== "object" || item === null) {
+      return { valid: false, reason: `message[${i}] is not an object` };
+    }
     const role = (item as Record<string, unknown>).role;
     const content = (item as Record<string, unknown>).content;
-    return (
-      (role === "user" || role === "assistant") &&
-      typeof content === "string" &&
-      content.length > 0 &&
-      content.length <= MAX_MESSAGE_LENGTH
-    );
-  });
+    if (role !== "user" && role !== "assistant") {
+      return { valid: false, reason: `message[${i}] has invalid role: ${JSON.stringify(role)}` };
+    }
+    if (typeof content !== "string") {
+      return { valid: false, reason: `message[${i}] content is not a string (got ${typeof content})` };
+    }
+    if (content.length === 0) {
+      return { valid: false, reason: `message[${i}] content is empty` };
+    }
+    if (content.length > MAX_MESSAGE_LENGTH) {
+      return { valid: false, reason: `message[${i}] content too long (${content.length} > ${MAX_MESSAGE_LENGTH})` };
+    }
+  }
+
+  return { valid: true, messages: value as ApiChatRequestMessage[] };
 }
 
 export async function POST(request: NextRequest) {
@@ -72,10 +86,13 @@ export async function POST(request: NextRequest) {
     return jsonError("Invalid request body.", 400);
   }
 
-  const messages = (body as { messages?: unknown } | null)?.messages;
-  if (!isValidMessages(messages)) {
-    return jsonError("Invalid message format.", 400);
+  const rawMessages = (body as { messages?: unknown } | null)?.messages;
+  const validation = validateMessages(rawMessages);
+  if (!validation.valid) {
+    console.error("Invalid /api/chat payload:", validation.reason);
+    return jsonError(`Invalid message format: ${validation.reason}`, 400);
   }
+  const messages = validation.messages;
 
   let client: ReturnType<typeof getNvidiaClient>;
   try {
