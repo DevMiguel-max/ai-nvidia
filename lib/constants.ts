@@ -36,7 +36,7 @@ export const RATE_LIMIT_WINDOW_MS = 60_000;
 export const RATE_LIMIT_MAX_REQUESTS = 20;
 
 // Request validation
-export const MAX_MESSAGE_LENGTH = 200_000; // characters per message
+export const MAX_MESSAGE_LENGTH = 250_000; // characters per message
 export const MAX_MESSAGES_PER_REQUEST = 200;
 
 // Client-side storage keys (localStorage)
