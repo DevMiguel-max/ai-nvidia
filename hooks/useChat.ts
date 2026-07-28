@@ -37,18 +37,32 @@ export function useChat({ updateMessages }: { updateMessages: UpdateMessages }) 
       markStreaming(conversationId, true);
 
       try {
+        // Guard against a corrupted history reaching the API silently as a
+        // 400. If any message lost its role/content (e.g. from a stray
+        // re-render bug), fail loud with a clear reason instead of letting
+        // the server reject it and the user see a blank "something went
+        // wrong" with no clue why.
+        const sanitizedHistory = history.filter(
+          (m) => (m.role === "user" || m.role === "assistant") && typeof m.content === "string" && m.content.length > 0
+        );
+        if (sanitizedHistory.length === 0) {
+          throw new Error("No valid messages to send \u2014 the conversation state looks corrupted. Try reloading the page.");
+        }
+
         const response = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            messages: history.map((m) => ({ role: m.role, content: m.content })),
+            messages: sanitizedHistory.map((m) => ({ role: m.role, content: m.content })),
           }),
           signal: controller.signal,
         });
 
         if (!response.ok || !response.body) {
           const data = await response.json().catch(() => ({}));
-          throw new Error(data.error ?? "The assistant is unavailable right now.");
+          throw new Error(
+            data.error ? `${data.error} (HTTP ${response.status})` : `Request failed (HTTP ${response.status}).`
+          );
         }
 
         const reader = response.body.getReader();
@@ -161,13 +175,14 @@ export function useChat({ updateMessages }: { updateMessages: UpdateMessages }) 
         }
       } catch (error) {
         const aborted = error instanceof DOMException && error.name === "AbortError";
+        const message = error instanceof Error ? error.message : "Something went wrong. Please try again.";
         updateMessages(conversationId, (prev) =>
           prev.map((m) =>
             m.id === assistantId
               ? {
                   ...m,
                   status: aborted ? "stopped" : "error",
-                  content: m.content || (aborted ? "" : "Something went wrong. Please try again."),
+                  content: m.content || (aborted ? "" : message),
                 }
               : m
           )
