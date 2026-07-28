@@ -14,18 +14,18 @@ export const MAX_TOKENS = 16384;
 export const REASONING_BUDGET = 8192;
 
 // How long to wait for the NVIDIA API before giving up and surfacing an
-// error. This model/endpoint has a known failure mode where the stream
-// hangs with no data and no closing event (reasoning budget exhausted
-// without producing content) — see lib/nvidiaClient.ts. Without this, the
-// request (and the UI) would hang until Vercel's own function timeout.
-export const NVIDIA_REQUEST_TIMEOUT_MS = 90_000;
+// error. Production logs showed a genuine 200 response taking close to 5
+// minutes (this model's reasoning mode can be very slow, not just
+// occasionally stuck) — so this needs to tolerate real latency, not just
+// guard against a truly dead connection. Only fires on genuine inactivity
+// (reset on every chunk received), not on total response time.
+export const NVIDIA_REQUEST_TIMEOUT_MS = 280_000;
 
 // How long the *browser* will wait without receiving a single new SSE event
-// before treating the connection as dead. This is a second, independent
-// safety net: even if the server-side timeout above fires correctly, a
-// misbehaving proxy or a connection that's half-open could still leave the
-// client's fetch reader awaiting a chunk that never arrives.
-export const CLIENT_STREAM_IDLE_TIMEOUT_MS = 100_000;
+// before treating the connection as dead. Kept slightly above the server
+// value so the server-side error (with a specific message) reaches the
+// user first in the common case.
+export const CLIENT_STREAM_IDLE_TIMEOUT_MS = 290_000;
 
 // Session / auth
 export const SESSION_COOKIE_NAME = "session";
