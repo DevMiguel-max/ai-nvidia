@@ -33,11 +33,12 @@ export function CodeBlock({ language, value, isStreaming }: CodeBlockProps) {
         </button>
       </div>
       {isStreaming ? (
-        <pre className="overflow-x-auto bg-canvas p-3 font-mono text-xs leading-relaxed text-foreground">
+        <pre key="streaming" className="overflow-x-auto bg-canvas p-3 font-mono text-xs leading-relaxed text-foreground">
           <code>{value}</code>
         </pre>
       ) : (
         <SyntaxHighlighter
+          key="highlighted"
           language={language}
           style={vscDarkPlus}
           customStyle={{
