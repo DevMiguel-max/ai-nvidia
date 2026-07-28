@@ -1,0 +1,12 @@
+{
+  "id": "nextjs",
+  "name": "Next.js App Router",
+  "description": "Best practices for Next.js App Router: server/client components, data fetching, route handlers, caching.",
+  "priority": 5,
+  "triggers": [
+    "next.js", "nextjs", "next js",
+    "app router", "server component", "client component",
+    "route handler", "server action", "server actions",
+    "app/api", "getserversideprops", "getstaticprops"
+  ]
+}
