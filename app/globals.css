@@ -1,0 +1,52 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+
+  /* Warm graphite + copper-amber. Deliberately not "near-black + neon
+     cyan/green" — that's the generic default, not a choice. Amber nods to
+     phosphor terminal displays: a real developer-tool lineage rather than
+     a generic "hacker" cliché. */
+  --color-canvas: #16151a;
+  --color-surface: #1f1e24;
+  --color-surface-hover: #28272e;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-foreground: #e9e6e1;
+  --color-muted: #928d87;
+  --color-accent: #d98a3d;
+  --color-accent-strong: #c97a2e;
+  --color-danger: #c96a5c;
+}
+
+html,
+body {
+  height: 100%;
+  background-color: var(--color-canvas);
+  color: var(--color-foreground);
+}
+
+* {
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
