@@ -1,0 +1,31 @@
+{
+  "id": "ui-ux-pro-max",
+  "name": "UI/UX Pro Max",
+  "description": "Design intelligence for UI/UX, landing pages, dashboards, React/Next.js components and Tailwind CSS. Injects rules and a per-request generated design system (colors, typography, effects) from the vendored ui-ux-pro-max database.",
+  "priority": 10,
+  "triggers": [
+    "ui", "ux", "ui/ux",
+    "landing page", "landing", "hero section",
+    "dashboard", "painel",
+    "componente react", "componentes react", "component react",
+    "next.js", "nextjs",
+    "tailwind", "tailwindcss",
+    "design system",
+    "interface web", "interface do usuario", "interface de usuario",
+    "experiencia do usuario", "user experience",
+    "prototipo", "wireframe",
+    "layout", "responsivo", "design responsivo",
+    "paleta de cores", "esquema de cores",
+    "tipografia",
+    "acessibilidade", "accessibility",
+    "modal", "formulario", "form", "botao", "navbar", "sidebar",
+    "design de interface", "estilo visual"
+  ],
+  "run": {
+    "interpreter": "python3",
+    "fallbackInterpreter": "python",
+    "script": "vendor/scripts/search.py",
+    "args": ["{query}", "--design-system", "-f", "markdown"],
+    "timeoutMs": 8000
+  }
+}
